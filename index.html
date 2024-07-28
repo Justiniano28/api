@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML form to Google Sheet</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #8ae1e7;
+            margin: 0;
+        }
+        .container {
+            max-width: 400px;
+            width: 100%;
+            padding: 20px;
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        input[type="text"], input[type="email"], input[type="tel"], input[type="password"] {
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        input[type="submit"], button {
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        input[type="submit"]:hover, button:hover {
+            background-color: #45a049;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="login-form" class="form">
+            <h1>Login Form</h1>
+            <form id="login-form-element">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <input type="submit" value="Login">
+            </form>
+        </div>
+
+        <div id="main-form" class="hidden">
+            <h1 id="msg">Welcome!</h1>
+            <form id="data-form" action="https://script.google.com/macros/s/AKfycbwzlkUoXt2SZIRP1hSodC0wUqixQ7d3PM9tcWeSPTQurSjp-InH7sagpOUMMfdMK9K0/exec" method="post" target="hidden_iframe">
+                <input type="text" name="name" placeholder="Name"><br><br>
+                <input type="email" name="email" placeholder="Email"><br><br>
+                <input type="tel" name="phone" placeholder="Phone"><br><br>
+                <input type="submit" id="sub" value="Submit">
+            </form>
+            <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+            <button id="logout">Logout</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            let loginFormElement = document.querySelector("#login-form-element");
+            let mainForm = document.querySelector("#main-form");
+            let loginForm = document.querySelector("#login-form");
+            let dataForm = document.querySelector("#data-form");
+            let iframe = document.querySelector("#hidden_iframe");
+            let logoutButton = document.querySelector("#logout");
+
+            // Check login status
+            if (localStorage.getItem('loggedIn') === 'true') {
+                loginForm.classList.add('hidden');
+                mainForm.classList.remove('hidden');
+            } else {
+                loginForm.classList.remove('hidden');
+                mainForm.classList.add('hidden');
+            }
+
+            loginFormElement.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // Set login state
+                localStorage.setItem('loggedIn', 'true');
+                loginForm.classList.add('hidden');
+                mainForm.classList.remove('hidden');
+            });
+
+            dataForm.addEventListener('submit', (e) => {
+                document.querySelector("#sub").value = "Submitting..";
+            });
+
+            iframe.addEventListener('load', () => {
+                let message = "Data submitted successfully!";
+                document.querySelector("#msg").innerHTML = message;
+                document.querySelector("#sub").value = "Submit";
+                dataForm.reset(); // This resets the form for new entries
+            });
+
+            logoutButton.addEventListener('click', () => {
+                // Clear login state
+                localStorage.removeItem('loggedIn');
+                mainForm.classList.add('hidden');
+                loginForm.classList.remove('hidden');
+                loginFormElement.reset(); // Clear the login form fields
+            });
+        });
+    </script>
+</body>
+</html>
